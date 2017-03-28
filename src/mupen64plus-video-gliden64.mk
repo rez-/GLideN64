@@ -81,6 +81,7 @@ MY_LOCAL_SRC_FILES :=                               \
     $(SRCDIR)/Graphics/CombinerProgram.cpp          \
     $(SRCDIR)/Graphics/ObjectHandle.cpp             \
     $(SRCDIR)/Graphics/OpenGLContext/GLFunctions.cpp                               \
+    $(SRCDIR)/Graphics/OpenGLContext/opengl_Wrapper.cpp                            \
     $(SRCDIR)/Graphics/OpenGLContext/opengl_Attributes.cpp                         \
     $(SRCDIR)/Graphics/OpenGLContext/opengl_BufferedDrawer.cpp                     \
     $(SRCDIR)/Graphics/OpenGLContext/opengl_BufferManipulationObjectFactory.cpp    \
