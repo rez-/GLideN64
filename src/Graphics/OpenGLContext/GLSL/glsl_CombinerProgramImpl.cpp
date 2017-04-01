@@ -4,10 +4,12 @@
 #include <Combiner.h>
 #include <Graphics/OpenGLContext/opengl_CachedFunctions.h>
 #include <Graphics/OpenGLContext/opengl_Utils.h>
+#include <Graphics/OpenGLContext/opengl_Wrapper.h>
 #include "glsl_Utils.h"
 #include "glsl_CombinerProgramImpl.h"
 
 using namespace glsl;
+using namespace opengl;
 
 CombinerProgramImpl::CombinerProgramImpl(const CombinerKey & _key,
 	GLuint _program,
@@ -27,7 +29,7 @@ CombinerProgramImpl::CombinerProgramImpl(const CombinerKey & _key,
 CombinerProgramImpl::~CombinerProgramImpl()
 {
 	m_useProgram->useProgram(graphics::ObjectHandle::null);
-	glDeleteProgram(GLuint(m_program));
+	FunctionWrapper::glDeleteProgram(GLuint(m_program));
 }
 
 void CombinerProgramImpl::activate()
@@ -77,7 +79,7 @@ bool CombinerProgramImpl::usesHwLighting() const
 bool CombinerProgramImpl::getBinaryForm(std::vector<char> & _buffer)
 {
 	GLint  binaryLength;
-	glGetProgramiv(GLuint(m_program), GL_PROGRAM_BINARY_LENGTH, &binaryLength);
+	FunctionWrapper::glGetProgramiv(GLuint(m_program), GL_PROGRAM_BINARY_LENGTH, &binaryLength);
 
 	if (binaryLength < 1)
 		return false;
@@ -88,7 +90,7 @@ bool CombinerProgramImpl::getBinaryForm(std::vector<char> & _buffer)
 		return false;
 
 	GLenum binaryFormat;
-	glGetProgramBinary(GLuint(m_program), binaryLength, &binaryLength, &binaryFormat, binary.data());
+	FunctionWrapper::glGetProgramBinary(GLuint(m_program), binaryLength, &binaryLength, &binaryFormat, binary.data());
 	if (opengl::Utils::isGLError())
 		return false;
 

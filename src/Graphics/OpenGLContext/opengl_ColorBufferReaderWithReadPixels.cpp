@@ -1,5 +1,6 @@
 #include <Graphics/Context.h>
 #include "opengl_ColorBufferReaderWithReadPixels.h"
+#include "opengl_Wrapper.h"
 #include <algorithm>
 
 using namespace graphics;
@@ -27,7 +28,7 @@ u8 * ColorBufferReaderWithReadPixels::readPixels(s32 _x0, s32 _y0, u32 _width, u
 
 	// No async pixel buffer copies are supported in this class, this is a last resort fallback
 	auto pixelData = std::unique_ptr<GLubyte[]>(new GLubyte[m_pTexture->realWidth * _height * colorFormatBytes]) ;
-	glReadPixels(_x0, _y0, m_pTexture->realWidth, _height, colorFormat, colorType, pixelData.get());
+	FunctionWrapper::glReadPixels(_x0, _y0, m_pTexture->realWidth, _height, colorFormat, colorType, pixelData.get());
 
 	int widthBytes = _width*colorFormatBytes;
 	int strideBytes = m_pTexture->realWidth * colorFormatBytes;

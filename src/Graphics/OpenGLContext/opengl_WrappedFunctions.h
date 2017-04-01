@@ -8,6 +8,8 @@
 #include <vector>
 #include "BlockingQueue.h"
 #include "GLFunctions.h"
+#include "opengl_Attributes.h"
+#include <algorithm>
 
 namespace opengl {
 
@@ -399,13 +401,6 @@ namespace opengl {
 
 		void commandToExecute(void) override
 		{
-			std::stringstream errorString;
-			errorString << "GlTexSubImage2DUnbuffered args: " << " target=" << m_target << " m_level=" << m_level
-						<< " m_xoffset=" << m_xoffset << " m_yoffset=" << m_yoffset << " m_width=" << m_width
-						<< " m_height=" << m_height << " m_format=0x" << std::hex << m_format << " m_type=0x" << m_type
-						<< " pixels=0x" << m_pixels.get();
-			LOG(LOG_ERROR, errorString.str().c_str());
-
 			g_glTexSubImage2D(m_target, m_level, m_xoffset, m_yoffset, m_width, m_height, m_format, m_type, m_pixels.get());
 		}
 	private:
@@ -1110,6 +1105,29 @@ namespace opengl {
 		std::size_t m_offset;
 	};
 
+	class GlVertexAttribPointerNotThreadSafeCommand : public OpenGlCommand
+	{
+	public:
+		GlVertexAttribPointerNotThreadSafeCommand(GLuint index, GLint size, GLenum type, GLboolean normalized,
+			GLsizei stride, const void *pointer):
+				OpenGlCommand(false), m_index(index), m_size(size), m_type(type), m_normalized(normalized),
+				m_stride(stride), m_pointer(pointer)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			g_glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, m_pointer);
+		}
+	private:
+		GLuint m_index;
+		GLint m_size;
+		GLenum m_type;
+		GLboolean m_normalized;
+		GLsizei m_stride;
+		const void* m_pointer;
+	};
+
 	class GlVertexAttribPointerUnbufferedCommand : public OpenGlCommand
 	{
 	public:
@@ -1120,9 +1138,27 @@ namespace opengl {
 		{
 		}
 
+		bool _updateAttribData(u32 _index, std::shared_ptr<std::vector<char>> _data)
+		{
+			if(m_attribsData[_index] == nullptr) {
+				m_attribsData[_index] = _data;
+				return true;
+			}
+
+			if(m_attribsData[_index] != nullptr && m_attribsData[_index]->size() < _data->size()) {
+				m_attribsData[_index]->resize(_data->size());
+				std::copy_n(_data->data(), _data->size(), m_attribsData[_index]->data());
+				return true;
+			} else {
+				std::copy_n(_data->data(), _data->size(), m_attribsData[_index]->data());
+				return false;
+			}
+		}
+
 		void commandToExecute(void) override
 		{
-			g_glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, (const GLvoid *)(m_data->data()+m_offset));
+			if(_updateAttribData(m_index, m_data) )
+				g_glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, (const GLvoid *)(m_attribsData[m_index]->data()+m_offset));
 		}
 	private:
 		GLuint m_index;
@@ -1132,6 +1168,8 @@ namespace opengl {
 		GLsizei m_stride;
 		std::size_t m_offset;
 		std::shared_ptr<std::vector<char>> m_data;
+
+		static std::array<std::shared_ptr<std::vector<char>>, MaxAttribIndex> m_attribsData;
 	};
 
 	class GlBindAttribLocationCommand : public OpenGlCommand
@@ -2265,26 +2303,25 @@ namespace opengl {
 		GLint m_level;
 	};
 
-	template <class indiceType>
 	class GlDrawElementsBaseVertexCommand : public OpenGlCommand
 	{
 	public:
-		GlDrawElementsBaseVertexCommand(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices,
+		GlDrawElementsBaseVertexCommand(GLenum mode, GLsizei count, GLenum type, const char* indices,
 										GLint basevertex):
-			OpenGlCommand(false), m_mode(mode), m_count(count), m_type(type), m_indices(std::move(indices)),
+			OpenGlCommand(false), m_mode(mode), m_count(count), m_type(type), m_indices(indices),
 			m_basevertex(basevertex)
 		{
 		}
 
 		void commandToExecute(void) override
 		{
-			g_glDrawElementsBaseVertex(m_mode, m_count, m_type, m_indices.get(), m_basevertex);
+			g_glDrawElementsBaseVertex(m_mode, m_count, m_type, m_indices, m_basevertex);
 		}
 	private:
 		GLenum m_mode;
 		GLsizei m_count;
 		GLenum m_type;
-		std::unique_ptr<indiceType[]> m_indices;
+		const char*  m_indices;
 		GLint m_basevertex;
 	};
 

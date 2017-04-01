@@ -2,6 +2,8 @@
 #include <Config.h>
 #include "opengl_Utils.h"
 #include "opengl_GLInfo.h"
+#include "opengl_Wrapper.h"
+
 #ifdef EGL
 #include <EGL/egl.h>
 #endif
@@ -9,22 +11,22 @@
 using namespace opengl;
 
 void GLInfo::init() {
-	const char * strVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+	const char * strVersion = reinterpret_cast<const char *>(FunctionWrapper::glGetString(GL_VERSION));
 	isGLESX = strstr(strVersion, "OpenGL ES") != nullptr;
 	isGLES2 = strstr(strVersion, "OpenGL ES 2") != nullptr;
 	if (isGLES2) {
 		majorVersion = 2;
 		minorVersion = 0;
 	} else {
-		glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
-		glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
+		FunctionWrapper::glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+		FunctionWrapper::glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 	}
 	LOG(LOG_VERBOSE, "%s major version: %d\n", isGLESX ? "OpenGL ES" : "OpenGL", majorVersion);
 	LOG(LOG_VERBOSE, "%s minor version: %d\n", isGLESX ? "OpenGL ES" : "OpenGL", minorVersion);
 
 
-	LOG(LOG_VERBOSE, "OpenGL vendor: %s\n", glGetString(GL_VENDOR));
-	const GLubyte * strRenderer = glGetString(GL_RENDERER);
+	LOG(LOG_VERBOSE, "OpenGL vendor: %s\n", FunctionWrapper::glGetString(GL_VENDOR));
+	const GLubyte * strRenderer = FunctionWrapper::glGetString(GL_RENDERER);
 	if (strstr((const char*)strRenderer, "Adreno") != nullptr)
 		renderer = Renderer::Adreno;
 	else if (strstr((const char*)strRenderer, "VideoCore IV") != nullptr)
@@ -67,7 +69,7 @@ void GLInfo::init() {
 			: "GL_ARB_get_program_binary";
 		if (Utils::isExtensionSupported(*this, strGetProgramBinary)) {
 			GLint numBinaryFormats = 0;
-			glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &numBinaryFormats);
+			FunctionWrapper::glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &numBinaryFormats);
 			shaderStorage = numBinaryFormats > 0;
 		}
 	}

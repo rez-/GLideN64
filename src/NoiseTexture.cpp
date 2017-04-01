@@ -125,6 +125,7 @@ void NoiseTexture::init()
 			params.format = fbTexFormats.noiseFormat;
 			params.dataType = fbTexFormats.noiseType;
 			params.data = texData[i].data();
+			params.dataBytes = texData[i].size();
 			gfxContext.update2DTexture(params);
 		}
 	}

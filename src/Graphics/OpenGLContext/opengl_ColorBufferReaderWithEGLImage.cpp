@@ -3,6 +3,7 @@
 #include <GBI.h>
 #include <Graphics/Context.h>
 #include "opengl_ColorBufferReaderWithEGLImage.h"
+#include "opengl_Wrapper.h"
 
 using namespace opengl;
 using namespace graphics;
@@ -69,7 +70,7 @@ u8 * ColorBufferReaderWithEGLImage::readPixels(s32 _x0, s32 _y0, u32 _width, u32
 
 		m_window.unlock();
 	} else {
-		glReadPixels(_x0, _y0, _width, _height, colorFormat, colorType, pixelData);
+		FunctionWrapper::glReadPixels(_x0, _y0, _width, _height, colorFormat, colorType, pixelData);
 	}
 
 	return pixelData;

@@ -6,11 +6,11 @@
 namespace opengl {
 	class CachedVertexAttribArray;
 
-	class UnbufferedDrawer : public GraphicsDrawer
+	class UnbufferedDrawerThreadSafe : public GraphicsDrawer
 	{
 	public:
-		UnbufferedDrawer(const GLInfo & _glinfo, CachedVertexAttribArray * _cachedAttribArray);
-		~UnbufferedDrawer();
+		UnbufferedDrawerThreadSafe(const GLInfo & _glinfo, CachedVertexAttribArray * _cachedAttribArray);
+		~UnbufferedDrawerThreadSafe();
 
 		void drawTriangles(const graphics::Context::DrawTriangleParameters & _params) override;
 
@@ -19,8 +19,6 @@ namespace opengl {
 		void drawLine(f32 _width, SPVertex * _vertices) override;
 
 	private:
-		bool _updateAttribPointer(u32 _index, const void * _ptr);
-
 		const GLInfo & m_glInfo;
 		CachedVertexAttribArray * m_cachedAttribArray;
 		std::array<const void*, MaxAttribIndex> m_attribsData;

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
+#include "GLideNHQ/TxUtil.h"
 #include "Textures.h"
 #include "GBI.h"
 #include "RSP.h"
@@ -13,7 +14,6 @@
 #include "FrameBuffer.h"
 #include "Config.h"
 #include "Keys.h"
-#include "GLideNHQ/Ext_TxFilter.h"
 #include "TextureFilterHandler.h"
 #include "Graphics/Context.h"
 #include "Graphics/Parameters.h"
@@ -487,7 +487,8 @@ void TextureCache::init()
 	m_maxBytes = config.texture.maxBytes;
 	m_curUnpackAlignment = 0;
 
-	u32 dummyTexture[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static const int numElements = 16;
+	u32 dummyTexture[numElements] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	m_pDummy = addFrameBufferTexture(false); // we don't want to remove dummy texture
 	_initDummyTexture(m_pDummy);
@@ -502,6 +503,7 @@ void TextureCache::init()
 	params.internalFormat = gfxContext.convertInternalTextureFormat(u32(internalcolorFormat::RGBA8));
 	params.dataType = datatype::UNSIGNED_BYTE;
 	params.data = dummyTexture;
+	params.dataBytes = numElements*sizeof(u32);
 	gfxContext.init2DTexture(params);
 
 	m_cachedBytes = m_pDummy->textureBytes;
@@ -776,6 +778,7 @@ bool TextureCache::_loadHiresBackground(CachedTexture *_pTexture)
 		params.internalFormat = InternalColorFormatParam(ghqTexInfo.format);
 		params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
 		params.data = ghqTexInfo.data;
+		params.dataBytes = params.width*params.height*4;
 		gfxContext.init2DTexture(params);
 
 		assert(!gfxContext.isError());
@@ -874,6 +877,7 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 			params.internalFormat = InternalColorFormatParam(ghqTexInfo.format);
 			params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
 			params.data = ghqTexInfo.data;
+			params.dataBytes = params.width*params.height*4;
 			gfxContext.init2DTexture(params);
 			_updateCachedTexture(ghqTexInfo, pTexture, ghqTexInfo.width / pTexture->realWidth);
 			bLoaded = true;
@@ -892,6 +896,7 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 		params.internalFormat = gfxContext.convertInternalTextureFormat(u32(glInternalFormat));
 		params.dataType = glType;
 		params.data = pDest;
+		params.dataBytes = pTexture->textureBytes;
 		gfxContext.init2DTexture(params);
 	}
 	if (m_curUnpackAlignment > 1)
@@ -962,6 +967,7 @@ bool TextureCache::_loadHiresTexture(u32 _tile, CachedTexture *_pTexture, u64 & 
 		params.format = ColorFormatParam(ghqTexInfo.texture_format);
 		params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
 		params.data = ghqTexInfo.data;
+		params.dataBytes = params.width*params.height*4;
 		gfxContext.init2DTexture(params);
 		assert(!gfxContext.isError());
 		_updateCachedTexture(ghqTexInfo, _pTexture, ghqTexInfo.width / tile_width);
@@ -986,6 +992,7 @@ void TextureCache::_loadDepthTexture(CachedTexture * _pTexture, u16* _pDest)
 	params.format = colorFormat::RED;
 	params.dataType = datatype::UNSIGNED_SHORT;
 	params.data = _pDest;
+	params.dataBytes = _pTexture->textureBytes;
 	gfxContext.init2DTexture(params);
 }
 
@@ -1192,6 +1199,7 @@ void TextureCache::_load(u32 _tile, CachedTexture *_pTexture)
 				params.format = ColorFormatParam(ghqTexInfo.texture_format);
 				params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
 				params.data = ghqTexInfo.data;
+				params.dataBytes = params.width*params.height*4;
 				gfxContext.init2DTexture(params);
 				_updateCachedTexture(ghqTexInfo, _pTexture, ghqTexInfo.width / tmptex.realWidth);
 				bLoaded = true;
@@ -1214,6 +1222,7 @@ void TextureCache::_load(u32 _tile, CachedTexture *_pTexture)
 			params.format = colorFormat::RGBA;
 			params.dataType = glType;
 			params.data = pDest;
+			params.dataBytes = _pTexture->textureBytes;
 			gfxContext.init2DTexture(params);
 		}
 		if (mipLevel == _pTexture->max_level)

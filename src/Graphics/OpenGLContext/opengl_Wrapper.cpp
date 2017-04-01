@@ -303,6 +303,12 @@ namespace opengl {
 		executeCommand(std::make_shared<GlVertexAttribPointerBufferedCommand>(index, size, type, normalized, stride, offset));
 	}
 
+	void FunctionWrapper::glVertexAttribPointerNotThreadSafe(GLuint index, GLint size, GLenum type, GLboolean normalized,
+		GLsizei stride, const void *pointer)
+	{
+		executeCommand(std::make_shared<GlVertexAttribPointerNotThreadSafeCommand>(index, size, type, normalized, stride, pointer));
+	}
+
 	void FunctionWrapper::glVertexAttribPointerUnbuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
 		std::size_t offset, std::shared_ptr<std::vector<char>> data)
 	{
@@ -591,6 +597,11 @@ namespace opengl {
 	void FunctionWrapper::glNamedFramebufferTexture(GLuint framebuffer, GLenum attachment, GLuint texture, GLint level)
 	{
 		executeCommand(std::make_shared<GlNamedFramebufferTextureCommand>(framebuffer, attachment, texture, level));
+	}
+
+	void FunctionWrapper::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, const char* indices, GLint basevertex)
+	{
+		executeCommand(std::make_shared<GlDrawElementsBaseVertexCommand>(mode, count, type, std::move(indices), basevertex));
 	}
 
 	void FunctionWrapper::glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)

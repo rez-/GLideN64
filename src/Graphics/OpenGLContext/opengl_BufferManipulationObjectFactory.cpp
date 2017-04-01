@@ -4,6 +4,7 @@
 #include "opengl_CachedFunctions.h"
 #include "opengl_Utils.h"
 #include "opengl_BufferManipulationObjectFactory.h"
+#include "opengl_Wrapper.h"
 
 //#define ENABLE_GL_4_5
 
@@ -17,7 +18,7 @@ public:
 	graphics::ObjectHandle createFramebuffer() override
 	{
 		GLuint fbo;
-		glGenFramebuffers(1, &fbo);
+		FunctionWrapper::glGenFramebuffers(1, &fbo);
 		return graphics::ObjectHandle(fbo);
 	}
 };
@@ -36,7 +37,7 @@ public:
 	graphics::ObjectHandle createFramebuffer() override
 	{
 		GLuint fbo;
-		glCreateFramebuffers(1, &fbo);
+		FunctionWrapper::glCreateFramebuffers(1, &fbo);
 		return graphics::ObjectHandle(fbo);
 	}
 };
@@ -49,7 +50,7 @@ public:
 	graphics::ObjectHandle createRenderbuffer() override
 	{
 		GLuint renderbuffer;
-		glGenRenderbuffers(1, &renderbuffer);
+		FunctionWrapper::glGenRenderbuffers(1, &renderbuffer);
 		return graphics::ObjectHandle(renderbuffer);
 	}
 };
@@ -64,7 +65,7 @@ public:
 	void initRenderbuffer(const graphics::Context::InitRenderbufferParams & _params) override
 	{
 		m_bind->bind(_params.target, _params.handle);
-		glRenderbufferStorage(GLenum(_params.target), GLenum(_params.format), _params.width, _params.height);
+		FunctionWrapper::glRenderbufferStorage(GLenum(_params.target), GLenum(_params.format), _params.width, _params.height);
 	}
 
 private:
@@ -83,12 +84,12 @@ public:
 	{
 		m_bind->bind(_params.bufferTarget, _params.bufferHandle);
 		if (_params.textureTarget == graphics::textureTarget::RENDERBUFFER) {
-			glFramebufferRenderbuffer(GLenum(_params.bufferTarget),
+			FunctionWrapper::glFramebufferRenderbuffer(GLenum(_params.bufferTarget),
 				GLenum(_params.attachment),
 				GLenum(_params.textureTarget),
 				GLuint(_params.textureHandle));
 		} else {
-			glFramebufferTexture2D(GLenum(_params.bufferTarget),
+			FunctionWrapper::glFramebufferTexture2D(GLenum(_params.bufferTarget),
 				GLenum(_params.attachment),
 				GLenum(_params.textureTarget),
 				GLuint(_params.textureHandle),
@@ -113,7 +114,7 @@ public:
 
 	void addFrameBufferRenderTarget(const graphics::Context::FrameBufferRenderTarget & _params) override
 	{
-		glNamedFramebufferTexture(GLuint(_params.bufferHandle),
+		FunctionWrapper::glNamedFramebufferTexture(GLuint(_params.bufferHandle),
 			GLenum(_params.attachment),
 			GLuint(_params.textureHandle),
 			0);
@@ -129,14 +130,17 @@ public:
 		: m_bind(_bind)
 		, m_size(_size)
 	{
-		glGenBuffers(1, &m_PBO);
+		FunctionWrapper::glGenBuffers(1, &m_PBO);
 		m_bind->bind(graphics::Parameter(GL_PIXEL_UNPACK_BUFFER), graphics::ObjectHandle(m_PBO));
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, m_size, nullptr, GL_DYNAMIC_DRAW);
+		FunctionWrapper::glBufferData<u8>(GL_PIXEL_UNPACK_BUFFER, m_size, std::move(std::unique_ptr<u8[]>(nullptr)), GL_DYNAMIC_DRAW);
 		m_bind->bind(graphics::Parameter(GL_PIXEL_UNPACK_BUFFER), graphics::ObjectHandle::null);
 	}
 
 	~PBOWriteBuffer() {
-		glDeleteBuffers(1, &m_PBO);
+		auto buffers = std::unique_ptr<GLuint[]>(new GLuint[1]);
+		buffers[0] = m_PBO;
+
+		FunctionWrapper::glDeleteBuffers(1, std::move(buffers));
 		m_PBO = 0;
 	}
 
@@ -144,12 +148,12 @@ public:
 	{
 		if (_size > m_size)
 			_size = m_size;
-		return glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, _size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		return FunctionWrapper::glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, _size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	}
 
 	void closeWriteBuffer() override
 	{
-		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		FunctionWrapper::glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 	}
 
 	void * getData() override {
@@ -177,16 +181,19 @@ public:
 		: m_bind(_bind)
 		, m_size(_size)
 	{
-		glGenBuffers(1, &m_PBO);
+		FunctionWrapper::glGenBuffers(1, &m_PBO);
 		m_bind->bind(graphics::Parameter(GL_PIXEL_UNPACK_BUFFER), graphics::ObjectHandle(m_PBO));
-		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_size * 32, nullptr, m_bufAccessBits);
-		m_bufferData = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_size * 32, m_bufMapBits);
+		FunctionWrapper::glBufferStorage(GL_PIXEL_UNPACK_BUFFER, m_size * 32, std::move(std::unique_ptr<u8[]>(nullptr)), m_bufAccessBits);
+		m_bufferData = FunctionWrapper::glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, m_size * 32, m_bufMapBits);
 		m_bufferOffset = 0;
 		m_bind->bind(graphics::Parameter(GL_PIXEL_UNPACK_BUFFER), graphics::ObjectHandle::null);
 	}
 
 	~PersistentWriteBuffer() {
-		glDeleteBuffers(1, &m_PBO);
+		auto buffers = std::unique_ptr<GLuint[]>(new GLuint[1]);
+		buffers[0] = m_PBO;
+
+		FunctionWrapper::glDeleteBuffers(1, std::move(buffers));
 		m_PBO = 0;
 	}
 
@@ -296,32 +303,35 @@ public:
 		: m_bind(_bind)
 		, m_size(_size)
 	{
-		glGenBuffers(1, &m_PBO);
+		FunctionWrapper::glGenBuffers(1, &m_PBO);
 		m_bind->bind(graphics::Parameter(GL_PIXEL_PACK_BUFFER), graphics::ObjectHandle(m_PBO));
-		glBufferData(GL_PIXEL_PACK_BUFFER, m_size, nullptr, GL_DYNAMIC_READ);
+		FunctionWrapper::glBufferData(GL_PIXEL_PACK_BUFFER, m_size, std::move(std::unique_ptr<u8[]>(nullptr)), GL_DYNAMIC_READ);
 		m_bind->bind(graphics::Parameter(GL_PIXEL_PACK_BUFFER), graphics::ObjectHandle::null);
 	}
 
 	~PBOReadBuffer() {
-		glDeleteBuffers(1, &m_PBO);
+		auto buffers = std::unique_ptr<GLuint[]>(new GLuint[1]);
+		buffers[0] = m_PBO;
+
+		FunctionWrapper::glDeleteBuffers(1, std::move(buffers));
 		m_PBO = 0;
 	}
 
 	void readPixels(s32 _x,s32 _y, u32 _width, u32 _height, graphics::Parameter _format, graphics::Parameter _type) override
 	{
-		glReadPixels(_x, _y, _width, _height, GLenum(_format), GLenum(_type), 0);
+		FunctionWrapper::glReadPixels(_x, _y, _width, _height, GLenum(_format), GLenum(_type), 0);
 	}
 
 	void * getDataRange(u32 _offset, u32 _range) override
 	{
 		if (_range > m_size)
 			_range = m_size;
-		return glMapBufferRange(GL_PIXEL_PACK_BUFFER, _offset, _range, GL_MAP_READ_BIT);
+		return FunctionWrapper::glMapBufferRange(GL_PIXEL_PACK_BUFFER, _offset, _range, GL_MAP_READ_BIT);
 	}
 
 	void closeReadBuffer() override
 	{
-		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+		FunctionWrapper::glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 	}
 
 
@@ -382,7 +392,7 @@ public:
 
 		m_enableScissor->enable(false);
 
-		glBlitFramebuffer(
+		FunctionWrapper::glBlitFramebuffer(
 			adrenoCoordFix + _params.srcX0, _params.srcY0, _params.srcX1, _params.srcY1,
 			adrenoCoordFix + _params.dstX0, _params.dstY0, _params.dstX1, _params.dstY1,
 			GLbitfield(_params.mask), GLenum(_params.filter)

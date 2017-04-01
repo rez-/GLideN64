@@ -82,6 +82,7 @@ namespace opengl {
 		static void glEnableVertexAttribArray(GLuint index);
 		static void glDisableVertexAttribArray(GLuint index);
 		static void glVertexAttribPointerBuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, std::size_t offset);
+		static void glVertexAttribPointerNotThreadSafe(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
 		static void glVertexAttribPointerUnbuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, std::size_t offset,
 			std::shared_ptr<std::vector<char>> data);
 		static void glBindAttribLocation(GLuint program, GLuint index, const std::string& name);
@@ -153,8 +154,7 @@ namespace opengl {
 		static void glCreateBuffers(GLsizei n, GLuint *buffers);
 		static void glCreateFramebuffers(GLsizei n, GLuint *framebuffers);
 		static void glNamedFramebufferTexture(GLuint framebuffer, GLenum attachment, GLuint texture, GLint level);
-		template <class indiceType>
-		static void glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices, GLint basevertex);
+		static void glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, const char* indices, GLint basevertex);
 		static void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length);
 		static void glFinish(void);
 	};
@@ -205,11 +205,5 @@ namespace opengl {
 	void FunctionWrapper::glTextureSubImage2DUnbuffered(GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, std::unique_ptr<pixelType[]> pixels)
 	{
 		executeCommand(std::make_shared<GlTextureSubImage2DUnbufferedCommand<pixelType>>(texture, level, xoffset, yoffset, width, height, format, type, std::move(pixels)));
-	}
-
-	template <class indiceType>
-	void FunctionWrapper::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices, GLint basevertex)
-	{
-		executeCommand(std::make_shared<GlDrawElementsBaseVertexCommand<indiceType>>(mode, count, type, std::move(indices), basevertex));
 	}
 }

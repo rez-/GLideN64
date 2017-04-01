@@ -162,6 +162,7 @@ struct Atlas {
 			updateParams.width = g->bitmap.width;
 			updateParams.height = g->bitmap.rows;
 			updateParams.data = g->bitmap.buffer;
+			updateParams.dataBytes = updateParams.width * updateParams.height * fbTexFormats.noiseFormatBytes;
 			gfxContext.update2DTexture(updateParams);
 
 			c[i].ax = _FIXED2FLOAT(g->advance.x, 6);

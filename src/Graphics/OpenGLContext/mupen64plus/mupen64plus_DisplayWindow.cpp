@@ -2,6 +2,7 @@
 #include <Graphics/Context.h>
 #include <Graphics/OpenGLContext/GLFunctions.h>
 #include <Graphics/OpenGLContext/opengl_Utils.h>
+#include <Graphics/OpenGLContext/opengl_Wrapper.h>
 #include <mupenplus/GLideN64_mupenplus.h>
 #include <GLideN64.h>
 #include <Config.h>
@@ -16,6 +17,8 @@
 #ifdef VC
 #include <bcm_host.h>
 #endif
+
+using namespace opengl;
 
 class DisplayWindowMupen64plus : public DisplayWindow
 {
@@ -180,15 +183,15 @@ void DisplayWindowMupen64plus::_readScreen2(void * _dest, int * _width, int * _h
 
 #ifndef OS_ANDROID
 	GLint oldMode;
-	glGetIntegerv(GL_READ_BUFFER, &oldMode);
+	FunctionWrapper::glGetIntegerv(GL_READ_BUFFER, &oldMode);
 	if (_front != 0)
-		glReadBuffer(GL_FRONT);
+		FunctionWrapper::glReadBuffer(GL_FRONT);
 	else
-		glReadBuffer(GL_BACK);
-	glReadPixels(0, m_heightOffset, m_screenWidth, m_screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, pBufferData);
-	glReadBuffer(oldMode);
+		FunctionWrapper::glReadBuffer(GL_BACK);
+	FunctionWrapper::glReadPixels(0, m_heightOffset, m_screenWidth, m_screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, pBufferData);
+	FunctionWrapper::glReadBuffer(oldMode);
 #else
-	glReadPixels(0, m_heightOffset, m_screenWidth, m_screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, pBufferData);
+	FunctionWrapper::glReadPixels(0, m_heightOffset, m_screenWidth, m_screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, pBufferData);
 #endif
 
 	//Convert RGBA to RGB
