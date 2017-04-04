@@ -23,7 +23,6 @@
 #include "Log.h"
 
 #define IS_GL_FUNCTION_VALID(proc_name) g_##proc_name != nullptr
-#define GET_GL_FUNCTION(proc_name) g_##proc_name
 
 #ifdef EGL
 extern PFNGLBLENDFUNCPROC g_glBlendFunc;
