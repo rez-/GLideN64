@@ -3,6 +3,7 @@
 #include "GLFunctions.h"
 #include "BlockingQueue.h"
 #include "opengl_WrappedFunctions.h"
+#include <mupenplus/GLideN64_mupenplus.h>
 
 namespace opengl {
 
@@ -157,6 +158,14 @@ namespace opengl {
 		static void glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, const char* indices, GLint basevertex);
 		static void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length);
 		static void glFinish(void);
+
+		//Vid_ext functions
+		static void CoreVideo_Init(void);
+		static void CoreVideo_Quit(void);
+		static m64p_error CoreVideo_SetVideoMode(int screenWidth, int screenHeight, int bitsPerPixel, m64p_video_mode mode, m64p_video_flags flags);
+		static void CoreVideo_GL_SetAttribute(m64p_GLattr attribute, int value);
+		static void CoreVideo_GL_GetAttribute(m64p_GLattr attribute, int *value);
+		static void CoreVideo_GL_SwapBuffers(void);
 	};
 
 	template <class pixelType>

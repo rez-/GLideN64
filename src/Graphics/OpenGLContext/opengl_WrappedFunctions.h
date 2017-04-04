@@ -10,15 +10,17 @@
 #include "GLFunctions.h"
 #include "opengl_Attributes.h"
 #include <algorithm>
+#include <mupenplus/GLideN64_mupenplus.h>
 
 namespace opengl {
 
 	class OpenGlCommand
 	{
 	protected:
-		OpenGlCommand (bool _synced):
+		OpenGlCommand (bool _synced, bool _isGlCommand = true):
 			m_synced(_synced),
-			m_executed(false)
+			m_executed(false),
+			m_isGlCommand(_isGlCommand)
 		{
 		}
 
@@ -27,6 +29,7 @@ namespace opengl {
 	private:
 		std::atomic<bool> m_synced;
 		bool m_executed;
+		bool m_isGlCommand;
 		std::mutex m_condvarMutex;
 		std::condition_variable m_condition;
 	public:
@@ -34,12 +37,15 @@ namespace opengl {
 
 			commandToExecute();
 
-			auto error = g_glGetError();
-			if (error != GL_NO_ERROR) {
-				std::stringstream errorString;
-				errorString << " OpenGL error: 0x" << std::hex << error;
-				LOG(LOG_ERROR, errorString.str().c_str());
-				throw std::runtime_error(errorString.str().c_str());
+			if(m_isGlCommand)
+			{
+				auto error = g_glGetError();
+				if (error != GL_NO_ERROR) {
+					std::stringstream errorString;
+					errorString << " OpenGL error: 0x" << std::hex << error;
+					LOG(LOG_ERROR, errorString.str().c_str());
+					throw std::runtime_error(errorString.str().c_str());
+				}
 			}
 
 			if (m_synced)
@@ -2354,6 +2360,106 @@ namespace opengl {
 		void commandToExecute(void) override
 		{
 			g_glFinish();
+		}
+	};
+
+	//Vid ext functions
+	class CoreVideoInitCommand : public OpenGlCommand
+	{
+	public:
+		CoreVideoInitCommand(void):
+			OpenGlCommand(true, false)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			::CoreVideo_Init();
+		}
+	};
+
+	class CoreVideoQuitCommand : public OpenGlCommand
+	{
+	public:
+		CoreVideoQuitCommand(void):
+			OpenGlCommand(true, false)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			::CoreVideo_Quit();
+		}
+	};
+
+	class CoreVideoSetVideoModeCommand : public OpenGlCommand
+	{
+	public:
+		CoreVideoSetVideoModeCommand(int screenWidth, int screenHeight, int bitsPerPixel, m64p_video_mode mode,
+			m64p_video_flags flags, m64p_error& returnValue):
+			OpenGlCommand(true, false), m_screenWidth(screenWidth), m_screenHeight(screenHeight), m_bitsPerPixel(bitsPerPixel),
+			m_mode(mode), m_flags(flags), m_returnValue(returnValue)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			m_returnValue = ::CoreVideo_SetVideoMode(m_screenWidth, m_screenHeight, m_bitsPerPixel, m_mode, m_flags);
+		}
+
+		int m_screenWidth;
+		int m_screenHeight;
+		int m_bitsPerPixel;
+		m64p_video_mode m_mode;
+		m64p_video_flags m_flags;
+		m64p_error& m_returnValue;
+	};
+
+	class CoreVideoGLSetAttributeCommand : public OpenGlCommand
+	{
+	public:
+		CoreVideoGLSetAttributeCommand(m64p_GLattr attribute, int value):
+			OpenGlCommand(true, false), m_attribute(attribute), m_value(value)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			::CoreVideo_GL_SetAttribute(m_attribute, m_value);
+		}
+
+		m64p_GLattr m_attribute;
+		int m_value;
+	};
+
+	class CoreVideoGLGetAttributeCommand : public OpenGlCommand
+	{
+	public:
+		CoreVideoGLGetAttributeCommand(m64p_GLattr attribute, int *value):
+			OpenGlCommand(true, false), m_attribute(attribute), m_value(value)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			::CoreVideo_GL_GetAttribute(m_attribute, m_value);
+		}
+
+		m64p_GLattr m_attribute;
+		int* m_value;
+	};
+
+	class CoreVideoGLSwapBuffersCommand : public OpenGlCommand
+	{
+	public:
+		CoreVideoGLSwapBuffersCommand(void):
+			OpenGlCommand(false, false)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			::CoreVideo_GL_SwapBuffers();
 		}
 	};
 }

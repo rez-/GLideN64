@@ -49,30 +49,30 @@ void DisplayWindowMupen64plus::_setAttributes()
 {
 	LOG(LOG_VERBOSE, "[gles2GlideN64]: _setAttributes\n");
 
-	CoreVideo_GL_SetAttribute(M64P_GL_CONTEXT_PROFILE_MASK, M64P_GL_CONTEXT_PROFILE_CORE);
-	CoreVideo_GL_SetAttribute(M64P_GL_CONTEXT_MAJOR_VERSION, 3);
-	CoreVideo_GL_SetAttribute(M64P_GL_CONTEXT_MINOR_VERSION, 3);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_CONTEXT_PROFILE_MASK, M64P_GL_CONTEXT_PROFILE_CORE);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_CONTEXT_MAJOR_VERSION, 3);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_CONTEXT_MINOR_VERSION, 3);
 
-	CoreVideo_GL_SetAttribute(M64P_GL_DOUBLEBUFFER, 1);
-	CoreVideo_GL_SetAttribute(M64P_GL_SWAP_CONTROL, config.video.verticalSync);
-	CoreVideo_GL_SetAttribute(M64P_GL_BUFFER_SIZE, 32);
-	CoreVideo_GL_SetAttribute(M64P_GL_DEPTH_SIZE, 16);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_DOUBLEBUFFER, 1);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_SWAP_CONTROL, config.video.verticalSync);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_BUFFER_SIZE, 32);
+	FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_DEPTH_SIZE, 16);
 	if (config.video.multisampling > 0 && config.frameBufferEmulation.enable == 0) {
-		CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLEBUFFERS, 1);
+		FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLEBUFFERS, 1);
 		if (config.video.multisampling <= 2)
-			CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 2);
+			FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 2);
 		else if (config.video.multisampling <= 4)
-			CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 4);
+			FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 4);
 		else if (config.video.multisampling <= 8)
-			CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 8);
+			FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 8);
 		else
-			CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 16);
+			FunctionWrapper::CoreVideo_GL_SetAttribute(M64P_GL_MULTISAMPLESAMPLES, 16);
 	}
 }
 
 bool DisplayWindowMupen64plus::_start()
 {
-	CoreVideo_Init();
+	FunctionWrapper::CoreVideo_Init();
 	_setAttributes();
 
 	m_bFullscreen = config.video.fullscreen > 0;
@@ -83,10 +83,10 @@ bool DisplayWindowMupen64plus::_start()
 
 	printf("(II) Setting video mode %dx%d...\n", m_screenWidth, m_screenHeight);
 	const m64p_video_flags flags = M64VIDEOFLAG_SUPPORT_RESIZING;
-	if (CoreVideo_SetVideoMode(m_screenWidth, m_screenHeight, 0, m_bFullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, flags) != M64ERR_SUCCESS) {
+	if (FunctionWrapper::CoreVideo_SetVideoMode(m_screenWidth, m_screenHeight, 0, m_bFullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, flags) != M64ERR_SUCCESS) {
 		//printf("(EE) Error setting videomode %dx%d\n", m_screenWidth, m_screenHeight);
 		LOG(LOG_ERROR, "[gles2GlideN64]: Error setting videomode %dx%d\n", m_screenWidth, m_screenHeight);
-		CoreVideo_Quit();
+		FunctionWrapper::CoreVideo_Quit();
 		return false;
 	}
 	LOG(LOG_VERBOSE, "[gles2GlideN64]: Create setting videomode %dx%d\n", m_screenWidth, m_screenHeight);
@@ -104,7 +104,7 @@ bool DisplayWindowMupen64plus::_start()
 
 void DisplayWindowMupen64plus::_stop()
 {
-	CoreVideo_Quit();
+	FunctionWrapper::CoreVideo_Quit();
 }
 
 void DisplayWindowMupen64plus::_swapBuffers()
@@ -119,7 +119,7 @@ void DisplayWindowMupen64plus::_swapBuffers()
 		gDP.changed |= CHANGED_COMBINE;
 		(*renderCallback)((gDP.changed&CHANGED_CPU_FB_WRITE) == 0 ? 1 : 0);
 	}
-	CoreVideo_GL_SwapBuffers();
+	FunctionWrapper::CoreVideo_GL_SwapBuffers();
 }
 
 void DisplayWindowMupen64plus::_saveScreenshot()
@@ -137,7 +137,7 @@ bool DisplayWindowMupen64plus::_resizeWindow()
 		printf("(EE) Error setting videomode %dx%d\n", m_screenWidth, m_screenHeight);
 		m_width = m_screenWidth = config.video.windowedWidth;
 		m_height = m_screenHeight = config.video.windowedHeight;
-		CoreVideo_Quit();
+		FunctionWrapper::CoreVideo_Quit();
 		return false;
 	}
 	_setBufferSize();

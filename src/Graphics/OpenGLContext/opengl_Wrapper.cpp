@@ -614,4 +614,36 @@ namespace opengl {
 		executeCommand(std::make_shared<GlFinishCommand>());
 	}
 
+	void FunctionWrapper::CoreVideo_Init(void)
+	{
+		executeCommand(std::make_shared<CoreVideoInitCommand>());
+	}
+
+	void FunctionWrapper::CoreVideo_Quit(void)
+	{
+		executeCommand(std::make_shared<CoreVideoQuitCommand>());
+	}
+
+	m64p_error FunctionWrapper::CoreVideo_SetVideoMode(int screenWidth, int screenHeight, int bitsPerPixel, m64p_video_mode mode, m64p_video_flags flags)
+	{
+		m64p_error returnValue;
+		executeCommand(std::make_shared<CoreVideoSetVideoModeCommand>(screenWidth, screenHeight, bitsPerPixel, mode, flags, returnValue));
+		return returnValue;
+	}
+
+	void FunctionWrapper::CoreVideo_GL_SetAttribute(m64p_GLattr attribute, int value)
+	{
+		executeCommand(std::make_shared<CoreVideoGLSetAttributeCommand>(attribute, value));
+	}
+
+	void FunctionWrapper::CoreVideo_GL_GetAttribute(m64p_GLattr attribute, int *value)
+	{
+		executeCommand(std::make_shared<CoreVideoGLGetAttributeCommand>(attribute, value));
+	}
+
+	void FunctionWrapper::CoreVideo_GL_SwapBuffers(void)
+	{
+		executeCommand(std::make_shared<CoreVideoGLSwapBuffersCommand>());
+	}
+
 }
