@@ -4,6 +4,7 @@
 #include "BlockingQueue.h"
 #include "opengl_WrappedFunctions.h"
 #include <mupenplus/GLideN64_mupenplus.h>
+#include <thread>
 
 namespace opengl {
 
@@ -12,11 +13,15 @@ namespace opengl {
 	private:
 		static void executeCommand(std::shared_ptr<OpenGlCommand> _command);
 
+		static void commandLoop(void);
+
 		static BlockingQueue<std::shared_ptr<OpenGlCommand>> m_commandQueue;
 
 		static bool m_threaded_wrapper;
+		static bool m_shutdown;
+		static std::thread m_commandExecutionThread;
 	public:
-		static void setThreadedMode(bool _threadMode);
+		static void setThreadedMode(void);
 
 		static void glBlendFunc(GLenum sfactor, GLenum dfactor);
 		static void glPixelStorei(GLenum pname, GLint param);
