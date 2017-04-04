@@ -1199,7 +1199,7 @@ namespace opengl {
 	private:
 		GLuint m_program;
 		GLuint m_index;
-		const std::string& m_name;
+		const std::string m_name;
 	};
 
 	class GlVertexAttrib1fCommand : public OpenGlCommand
