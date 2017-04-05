@@ -37,10 +37,6 @@ namespace opengl {
 	public:
 		void performCommand(void) {
 
-			std::stringstream errorString;
-			errorString << " Executing: " << m_functionName;
-			LOG(LOG_ERROR, errorString.str().c_str());
-
 			commandToExecute();
 
 			if(m_isGlCommand)
@@ -53,7 +49,7 @@ namespace opengl {
 					//throw std::runtime_error(errorString.str().c_str());
 				}
 			}
-
+*/
 			if (m_synced)
 			{
 				m_executed = true;
@@ -1152,19 +1148,12 @@ namespace opengl {
 
 		bool _updateAttribData(u32 _index, std::shared_ptr<std::vector<char>> _data)
 		{
-			if(m_attribsData[_index] == nullptr) {
+			if(m_attribsData[_index] == nullptr || *m_attribsData[_index] != *_data) {
 				m_attribsData[_index] = _data;
 				return true;
 			}
 
-			if(m_attribsData[_index] != nullptr && m_attribsData[_index]->size() < _data->size()) {
-				m_attribsData[_index]->resize(_data->size());
-				std::copy_n(_data->data(), _data->size(), m_attribsData[_index]->data());
-				return true;
-			} else {
-				std::copy_n(_data->data(), _data->size(), m_attribsData[_index]->data());
-				return false;
-			}
+			return false;
 		}
 
 		void commandToExecute(void) override
@@ -1689,20 +1678,10 @@ namespace opengl {
 			OpenGlCommand(true, "glMapBufferRange"), m_target(target), m_offset(offset), m_length(length), m_access(access),
 			m_returnValue(returnValue)
 		{
-			std::stringstream errorString;
-			errorString << " GlMapBufferRangeCommand args----> target=" << std::hex << target << " offset=" << std::dec << offset
-						<< " length=" << length << " access=" << std::hex << access;
-			LOG(LOG_ERROR, errorString.str().c_str());
-
 		}
 
 		void commandToExecute(void) override
 		{
-			std::stringstream errorString;
-			errorString << " args----> target=" << std::hex << m_target << " offset=" << std::dec << m_offset
-						<< " length=" << m_length << " access=" << std::hex << m_access;
-			LOG(LOG_ERROR, errorString.str().c_str());
-
 			m_returnValue = reinterpret_cast<GLubyte*>(g_glMapBufferRange(m_target, m_offset, m_length, m_access));
 		}
 	private:

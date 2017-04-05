@@ -72,6 +72,8 @@ void DisplayWindowMupen64plus::_setAttributes()
 
 bool DisplayWindowMupen64plus::_start()
 {
+	FunctionWrapper::setThreadedMode();
+
 	FunctionWrapper::CoreVideo_Init();
 	_setAttributes();
 
