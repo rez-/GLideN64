@@ -13,6 +13,8 @@ namespace opengl {
 	private:
 		static void executeCommand(std::shared_ptr<OpenGlCommand> _command);
 
+		static void executePriorityCommand(std::shared_ptr<OpenGlCommand> _command);
+
 		static void commandLoop(void);
 
 		static BlockingQueue<std::shared_ptr<OpenGlCommand>> m_commandQueue;

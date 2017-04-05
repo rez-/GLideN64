@@ -31,15 +31,15 @@ namespace opengl {
 	private:
 		std::atomic<bool> m_synced;
 		bool m_executed;
-		bool m_isGlCommand;
-		bool m_logIfSynced;
+		const bool m_isGlCommand;
+		const bool m_logIfSynced;
 		std::mutex m_condvarMutex;
 		std::condition_variable m_condition;
 	protected:
 		const std::string m_functionName;
 	public:
 		void performCommand(void) {
-
+			std::unique_lock<std::mutex> lock(m_condvarMutex);
 			commandToExecute();
 #ifdef GL_DEBUG
 			if(m_isGlCommand)
@@ -68,8 +68,9 @@ namespace opengl {
 		}
 
 		void waitOnCommand(void) {
-			if (m_synced) {
-				std::unique_lock<std::mutex> lock(m_condvarMutex);
+			std::unique_lock<std::mutex> lock(m_condvarMutex);
+
+			if (m_synced && !m_executed) {
 				m_condition.wait(lock, [this]{return m_executed;});
 			}
 		}
@@ -583,7 +584,7 @@ namespace opengl {
 	{
 	public:
 		GlGenTexturesCommand(GLsizei n, GLuint *textures):
-			OpenGlCommand(true, false, "glGenTextures"), m_n(n), m_textures(textures)
+			OpenGlCommand(true, true, "glGenTextures"), m_n(n), m_textures(textures)
 		{
 		}
 

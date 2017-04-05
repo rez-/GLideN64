@@ -21,6 +21,15 @@ public:
 		}
 		this->d_condition.notify_one();
 	}
+
+	void pushBack(T const& value) {
+		{
+			std::unique_lock<std::mutex> lock(this->d_mutex);
+			d_queue.push_back(value);
+		}
+		this->d_condition.notify_one();
+	}
+
 	T pop() {
 		std::unique_lock<std::mutex> lock(this->d_mutex);
 		this->d_condition.wait(lock, [this]{ return !this->d_queue.empty(); });
