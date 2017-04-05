@@ -130,9 +130,13 @@ namespace opengl {
 
 	GLenum FunctionWrapper::glGetError(void)
 	{
+#ifdef GL_DEBUG
 		GLenum returnValue;
 		executeCommand(std::make_shared<GlGetErrorCommand>(returnValue));
 		return returnValue;
+#else
+		return GL_NO_ERROR;
+#endif
 	}
 
 	void FunctionWrapper::glLineWidth(GLfloat width)
@@ -424,9 +428,13 @@ namespace opengl {
 
 	GLenum FunctionWrapper::glCheckFramebufferStatus(GLenum target)
 	{
+#ifdef GL_DEBUG
 		GLenum returnValue;
 		executeCommand(std::make_shared<GlCheckFramebufferStatusCommand>(target, returnValue));
 		return returnValue;
+#else
+		return GL_FRAMEBUFFER_COMPLETE;
+#endif
 	}
 
 	void FunctionWrapper::glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
