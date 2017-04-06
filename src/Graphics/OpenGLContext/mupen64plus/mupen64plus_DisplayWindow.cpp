@@ -123,6 +123,10 @@ void DisplayWindowMupen64plus::_swapBuffers()
 		gDP.changed |= CHANGED_COMBINE;
 		(*renderCallback)((gDP.changed&CHANGED_CPU_FB_WRITE) == 0 ? 1 : 0);
 	}
+
+	//Don't let the command queue grow too big buy waiting on no more swap buffers being queued
+	FunctionWrapper::WaitForSwapBuffersQueued();
+
 	FunctionWrapper::CoreVideo_GL_SwapBuffers();
 }
 

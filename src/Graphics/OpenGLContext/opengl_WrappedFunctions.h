@@ -10,6 +10,7 @@
 #include "GLFunctions.h"
 #include "opengl_Attributes.h"
 #include <algorithm>
+#include <functional>
 #include <mupenplus/GLideN64_mupenplus.h>
 
 namespace opengl {
@@ -2458,14 +2459,17 @@ namespace opengl {
 	class CoreVideoGLSwapBuffersCommand : public OpenGlCommand
 	{
 	public:
-		CoreVideoGLSwapBuffersCommand(void):
-			OpenGlCommand(false, false, "CoreVideo_GL_SwapBuffers", false)
+		CoreVideoGLSwapBuffersCommand(std::function<void(void)> swapBuffersCallback):
+			OpenGlCommand(false, false, "CoreVideo_GL_SwapBuffers", false), m_swapBuffersCallback(swapBuffersCallback)
 		{
 		}
 
 		void commandToExecute(void) override
 		{
 			::CoreVideo_GL_SwapBuffers();
+			m_swapBuffersCallback();
 		}
+
+		std::function<void(void)> m_swapBuffersCallback;
 	};
 }

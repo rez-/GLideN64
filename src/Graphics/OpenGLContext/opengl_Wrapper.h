@@ -21,7 +21,10 @@ namespace opengl {
 
 		static bool m_threaded_wrapper;
 		static bool m_shutdown;
+		static int m_swapBuffersQueued;
 		static std::thread m_commandExecutionThread;
+		static std::mutex m_condvarMutex;
+		static std::condition_variable m_condition;
 	public:
 		static void setThreadedMode(void);
 
@@ -173,6 +176,8 @@ namespace opengl {
 		static void CoreVideo_GL_SetAttribute(m64p_GLattr attribute, int value);
 		static void CoreVideo_GL_GetAttribute(m64p_GLattr attribute, int *value);
 		static void CoreVideo_GL_SwapBuffers(void);
+		static void ReduceSwapBuffersQueued(void);
+		static void WaitForSwapBuffersQueued(void);
 	};
 
 	template <class pixelType>

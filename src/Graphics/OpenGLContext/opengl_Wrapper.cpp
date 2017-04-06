@@ -4,7 +4,10 @@ namespace opengl {
 
 	bool FunctionWrapper::m_threaded_wrapper = false;
 	bool FunctionWrapper::m_shutdown = false;
+	int FunctionWrapper::m_swapBuffersQueued = 0;
 	std::thread FunctionWrapper::m_commandExecutionThread;
+	std::mutex FunctionWrapper::m_condvarMutex;
+	std::condition_variable FunctionWrapper::m_condition;
 	BlockingQueue<std::shared_ptr<OpenGlCommand>> FunctionWrapper::m_commandQueue;
 
 	void FunctionWrapper::executeCommand(std::shared_ptr<OpenGlCommand> _command)
@@ -172,7 +175,6 @@ namespace opengl {
 
 	void FunctionWrapper::glGenTextures(GLsizei n, GLuint *textures)
 	{
-		//TODO: This should be possible to do with executePriorityCommand, but it causes bugs with it somehow
 		executePriorityCommand(std::make_shared<GlGenTexturesCommand>(n, textures));
 	}
 
@@ -684,7 +686,26 @@ namespace opengl {
 
 	void FunctionWrapper::CoreVideo_GL_SwapBuffers(void)
 	{
-		executeCommand(std::make_shared<CoreVideoGLSwapBuffersCommand>());
+		++m_swapBuffersQueued;
+		executeCommand(std::make_shared<CoreVideoGLSwapBuffersCommand>([]{ReduceSwapBuffersQueued();}));
 	}
 
+	void FunctionWrapper::ReduceSwapBuffersQueued(void)
+	{
+		--m_swapBuffersQueued;
+
+		if(m_swapBuffersQueued == 0)
+		{
+			m_condition.notify_all();
+		}
+	}
+
+	void FunctionWrapper::WaitForSwapBuffersQueued(void)
+	{
+		std::unique_lock<std::mutex> lock(m_condvarMutex);
+
+		if (!m_shutdown && m_swapBuffersQueued != 0) {
+			m_condition.wait(lock, []{return FunctionWrapper::m_swapBuffersQueued == 0;});
+		}
+	}
 }
