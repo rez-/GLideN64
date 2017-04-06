@@ -51,6 +51,8 @@ bool Config_SetDefault()
 	assert(res == M64ERR_SUCCESS);
 	res = ConfigSetDefaultInt(g_configVideoGliden64, "CropHeight", config.video.cropHeight, "Crop height pixels from top and bottom of resulted image (in native resolution)");
 	assert(res == M64ERR_SUCCESS);
+	res = ConfigSetDefaultBool(g_configVideoGliden64, "ThreadedVideo", config.video.threadedVideo, "Enable threaded video backend");
+	assert(res == M64ERR_SUCCESS);
 
 	res = ConfigSetDefaultInt(g_configVideoGliden64, "MultiSampling", config.video.multisampling, "Enable/Disable MultiSampling (0=off, 2,4,8,16=quality)");
 	assert(res == M64ERR_SUCCESS);
@@ -212,6 +214,7 @@ void Config_LoadConfig()
 	config.video.cropMode = ConfigGetParamInt(g_configVideoGliden64, "CropMode");
 	config.video.cropWidth = ConfigGetParamInt(g_configVideoGliden64, "CropWidth");
 	config.video.cropHeight = ConfigGetParamInt(g_configVideoGliden64, "CropHeight");
+	config.video.threadedVideo = ConfigGetParamBool(g_configVideoGliden64, "ThreadedVideo");
 	const u32 multisampling = ConfigGetParamInt(g_configVideoGliden64, "MultiSampling");
 	config.video.multisampling = multisampling == 0 ? 0 : pow2(multisampling);
 	config.frameBufferEmulation.aspect = ConfigGetParamInt(g_configVideoGliden64, "AspectRatio");

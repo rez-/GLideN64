@@ -33,6 +33,7 @@ struct Config
 		u32 cropMode;
 		u32 cropWidth;
 		u32 cropHeight;
+		u32 threadedVideo;
 	} video;
 
 	struct

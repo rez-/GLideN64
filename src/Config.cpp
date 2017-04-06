@@ -25,6 +25,7 @@ void Config::resetToDefaults()
 	video.verticalSync = 0;
 	video.cropMode = cmDisable;
 	video.cropWidth = video.cropHeight = 0;
+	video.threadedVideo = 0;
 
 	texture.maxAnisotropy = 0;
 	texture.bilinearMode = BILINEAR_STANDARD;
