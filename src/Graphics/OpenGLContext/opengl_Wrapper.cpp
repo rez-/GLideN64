@@ -132,6 +132,11 @@ namespace opengl {
 		executeCommand(std::make_shared<GlReadPixelsCommand>(x, y, width, height, format, type, pixels));
 	}
 
+	void FunctionWrapper::glReadPixelsAsync(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type)
+	{
+		executeCommand(std::make_shared<GlReadPixelsAyncCommand>(x, y, width, height, format, type));
+	}
+
 	void FunctionWrapper::glTexSubImage2DBuffered(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, std::size_t offset)
 	{
 		executeCommand(std::make_shared<GlTexSubImage2DBufferedCommand>(target, level, xoffset, yoffset, width, height, format, type, offset));
@@ -530,13 +535,13 @@ namespace opengl {
 	GLsync FunctionWrapper::glFenceSync(GLenum condition, GLbitfield flags)
 	{
 		GLsync returnValue;
-		executeCommand(std::make_shared<GlFenceSyncCommand>(condition, flags, returnValue));
+		executePriorityCommand(std::make_shared<GlFenceSyncCommand>(condition, flags, returnValue));
 		return returnValue;
 	}
 
 	void FunctionWrapper::glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
 	{
-		executeCommand(std::make_shared<GlClientWaitSyncCommand>(sync, flags, timeout));
+		executePriorityCommand(std::make_shared<GlClientWaitSyncCommand>(sync, flags, timeout));
 	}
 
 	void FunctionWrapper::glDeleteSync(GLsync sync)

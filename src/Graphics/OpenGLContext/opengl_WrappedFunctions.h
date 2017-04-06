@@ -388,15 +388,14 @@ namespace opengl {
 	class GlReadPixelsAyncCommand : public OpenGlCommand
 	{
 	public:
-		GlReadPixelsAyncCommand(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, std::shared_ptr<char*> pixels):
-			OpenGlCommand(false, false, "glReadPixels"), m_x(x), m_y(y), m_width(width), m_height(height), m_format(format), m_type(type),
-			m_pixels(pixels)
+		GlReadPixelsAyncCommand(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type):
+			OpenGlCommand(false, false, "glReadPixels"), m_x(x), m_y(y), m_width(width), m_height(height), m_format(format), m_type(type)
 		{
 		}
 
 		void commandToExecute(void) override
 		{
-			g_glReadPixels(m_x, m_y, m_width, m_height, m_format, m_type, m_pixels.get());
+			g_glReadPixels(m_x, m_y, m_width, m_height, m_format, m_type, nullptr);
 		}
 	private:
 		GLint m_x;
@@ -405,7 +404,6 @@ namespace opengl {
 		GLsizei m_height;
 		GLenum m_format;
 		GLenum m_type;
-		std::shared_ptr<char*> m_pixels;
 	};
 
 	template <class pixelType>
@@ -1839,7 +1837,7 @@ namespace opengl {
 	{
 	public:
 		GlFenceSyncCommand(GLenum condition, GLbitfield flags, GLsync& returnValue):
-			OpenGlCommand(false, false, "glFenceSync"), m_condition(condition), m_flags(flags), m_returnValue(returnValue)
+			OpenGlCommand(true, false, "glFenceSync"), m_condition(condition), m_flags(flags), m_returnValue(returnValue)
 		{
 		}
 
@@ -1857,7 +1855,7 @@ namespace opengl {
 	{
 	public:
 		GlClientWaitSyncCommand(GLsync sync, GLbitfield flags, GLuint64 timeout):
-			OpenGlCommand(false, false, "glClientWaitSync"), m_sync(sync), m_flags(flags), m_timeout(timeout)
+			OpenGlCommand(true, false, "glClientWaitSync"), m_sync(sync), m_flags(flags), m_timeout(timeout)
 		{
 		}
 
@@ -1875,7 +1873,7 @@ namespace opengl {
 	{
 	public:
 		GlDeleteSyncCommand(GLsync sync):
-			OpenGlCommand(false, false, "glDeleteSync"), m_sync(sync)
+			OpenGlCommand(true, false, "glDeleteSync"), m_sync(sync)
 		{
 		}
 

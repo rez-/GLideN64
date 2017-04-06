@@ -48,6 +48,7 @@ namespace opengl {
 		static const GLubyte* glGetString(GLenum name);
 
 		static void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels);
+		static void glReadPixelsAsync(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type);
 		template <class pixelType>
 		static void glTexSubImage2DUnbuffered(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, std::unique_ptr<pixelType[]> pixels);
 		static void glTexSubImage2DBuffered(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, std::size_t offset);

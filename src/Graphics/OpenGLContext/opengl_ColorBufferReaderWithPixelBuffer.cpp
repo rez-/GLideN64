@@ -66,7 +66,7 @@ u8 * ColorBufferReaderWithPixelBuffer::readPixels(s32 _x0, s32 _y0, u32 _width, 
 		m_curIndex ^= 1;
 		const u32 nextIndex = m_curIndex ^ 1;
 		m_bindBuffer->bind(Parameter(GL_PIXEL_PACK_BUFFER), ObjectHandle(m_PBO[m_curIndex]));
-		FunctionWrapper::glReadPixels(_x0, _y0, m_pTexture->realWidth, _height, colorFormat, colorType, 0);
+		FunctionWrapper::glReadPixelsAsync(_x0, _y0, m_pTexture->realWidth, _height, colorFormat, colorType);
 		m_bindBuffer->bind(Parameter(GL_PIXEL_PACK_BUFFER), ObjectHandle(m_PBO[nextIndex]));
 	} else {
 		m_bindBuffer->bind(Parameter(GL_PIXEL_PACK_BUFFER), ObjectHandle(m_PBO[_numPBO -1]));
