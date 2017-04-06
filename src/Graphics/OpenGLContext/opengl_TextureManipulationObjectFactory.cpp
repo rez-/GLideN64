@@ -62,7 +62,7 @@ namespace opengl {
 			if (_params.msaaLevel == 0) {
 				std::unique_ptr<u8[]> data(nullptr);
 				if(_params.dataBytes != 0 && _params.data != nullptr) {
-					std::unique_ptr<u8[]> data(new u8[_params.dataBytes]);
+					data = std::unique_ptr<u8[]>(new u8[_params.dataBytes]);
 					std::copy_n(reinterpret_cast<const char*>(_params.data), _params.dataBytes, data.get());
 				}
 
@@ -124,14 +124,21 @@ namespace opengl {
 				}
 
 				if (_params.data != nullptr) {
-					FunctionWrapper::glTexSubImage2DBuffered(GL_TEXTURE_2D,
+					std::unique_ptr<u8[]> data(nullptr);
+
+					if(_params.dataBytes != 0 && _params.data != nullptr) {
+						data = std::unique_ptr<u8[]>(new u8[_params.dataBytes]);
+						std::copy_n(reinterpret_cast<const char*>(_params.data), _params.dataBytes, data.get());
+					}
+
+					FunctionWrapper::glTexSubImage2DUnbuffered(GL_TEXTURE_2D,
 						_params.mipMapLevel,
 						0, 0,
 						_params.width,
 						_params.height,
 						GLuint(_params.format),
 						GLenum(_params.dataType),
-						reinterpret_cast<std::size_t>(_params.data));
+						std::move(data));
 				}
 
 				if (_params.ImageUnit.isValid() && m_imageTextures)
@@ -307,7 +314,7 @@ namespace opengl {
 			} else {
 				std::unique_ptr<u8[]> data(nullptr);
 				if(_params.dataBytes != 0 && _params.data != nullptr) {
-					std::unique_ptr<u8[]> data(new u8[_params.dataBytes]);
+					data = std::unique_ptr<u8[]>(new u8[_params.dataBytes]);
 					std::copy_n(reinterpret_cast<const char*>(_params.data), _params.dataBytes, data.get());
 				}
 
