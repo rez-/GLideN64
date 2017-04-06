@@ -59,7 +59,7 @@ void GLInfo::init() {
 	if (isGLESX && bufferStorage)
 		g_glBufferStorage = (PFNGLBUFFERSTORAGEPROC) eglGetProcAddress("glBufferStorageEXT");
 #endif
-	texStorage = (isGLESX && (numericVersion >= 30)) || (!isGLESX && numericVersion >= 42) ||
+	texStorage = (isGLESX && (numericVersion >= 30) && config.video.multisampling != 0) || (!isGLESX && numericVersion >= 42) ||
 			Utils::isExtensionSupported(*this, "GL_ARB_texture_storage");
 
 	shaderStorage = false;
