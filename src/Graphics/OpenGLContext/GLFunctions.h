@@ -56,6 +56,38 @@ extern PFNGLACTIVETEXTUREPROC g_glActiveTexture;
 extern PFNGLBLENDCOLORPROC g_glBlendColor;
 extern PFNGLREADBUFFERPROC g_glReadBuffer;
 extern PFNGLFINISHPROC g_glFinish;
+#else
+#define g_glBlendFunc(...) glBlendFunc(__VA_ARGS__)
+#define g_glPixelStorei(...) glPixelStorei(__VA_ARGS__)
+#define g_glClearColor(...) glClearColor(__VA_ARGS__)
+#define g_glCullFace(...) glCullFace(__VA_ARGS__)
+#define g_glDepthFunc(...) glDepthFunc(__VA_ARGS__)
+#define g_glDepthMask(...) glDepthMask(__VA_ARGS__)
+#define g_glDisable(...) glDisable(__VA_ARGS__)
+#define g_glEnable(...) glEnable(__VA_ARGS__)
+#define g_glPolygonOffset(...) glPolygonOffset(__VA_ARGS__)
+#define g_glScissor(...) glScissor(__VA_ARGS__)
+#define g_glViewport(...) glViewport(__VA_ARGS__)
+#define g_glBindTexture(...) glBindTexture(__VA_ARGS__)
+#define g_glTexImage2D(...) glTexImage2D(__VA_ARGS__)
+#define g_glTexParameteri(...) glTexParameteri(__VA_ARGS__)
+#define g_glGetIntegerv(...) glGetIntegerv(__VA_ARGS__)
+#define g_glGetString(...) glGetString(__VA_ARGS__)
+#define g_glReadPixels(...) glReadPixels(__VA_ARGS__)
+#define g_glTexSubImage2D(...) glTexSubImage2D(__VA_ARGS__)
+#define g_glDrawArrays(...) glDrawArrays(__VA_ARGS__)
+#define g_glGetError(...) glGetError(__VA_ARGS__)
+#define g_glDrawElements(...) glDrawElements(__VA_ARGS__)
+#define g_glLineWidth(...) glLineWidth(__VA_ARGS__)
+#define g_glClear(...) glClear(__VA_ARGS__)
+#define g_glGetFloatv(...) glGetFloatv(__VA_ARGS__)
+#define g_glDeleteTextures(...) glDeleteTextures(__VA_ARGS__)
+#define g_glGenTextures(...) glGenTextures(__VA_ARGS__)
+#define g_glTexParameterf(...) glTexParameterf(__VA_ARGS__)
+#define g_glActiveTexture(...) glActiveTexture(__VA_ARGS__)
+#define g_glBlendColor(...) glBlendColor(__VA_ARGS__)
+#define g_glReadBuffer(...) glReadBuffer(__VA_ARGS__)
+#define g_glFinish(...) glFinish(__VA_ARGS__)
 #endif
 
 #ifdef OS_WINDOWS
