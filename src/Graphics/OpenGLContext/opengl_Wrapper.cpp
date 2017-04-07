@@ -146,6 +146,10 @@ namespace opengl {
 	{
 		executeCommand(std::make_shared<GlDrawArraysCommand>(mode, first, count));
 	}
+	void FunctionWrapper::glDrawArraysUnbuffered(GLenum mode, GLint first, GLsizei count, std::unique_ptr<std::vector<char>> data)
+	{
+		executeCommand(std::make_shared<GlDrawArraysUnbufferedCommand>(mode, first, count, std::move(data)));
+	}
 
 	GLenum FunctionWrapper::glGetError(void)
 	{
@@ -348,9 +352,9 @@ namespace opengl {
 	}
 
 	void FunctionWrapper::glVertexAttribPointerUnbuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
-		std::size_t offset, std::shared_ptr<std::vector<char>> data)
+		std::size_t offset)
 	{
-		executeCommand(std::make_shared<GlVertexAttribPointerUnbufferedCommand>(index, size, type, normalized, stride, offset, data));
+		executeCommand(std::make_shared<GlVertexAttribPointerUnbufferedCommand>(index, size, type, normalized, stride, offset));
 	}
 
 	void FunctionWrapper::glBindAttribLocation(GLuint program, GLuint index, const std::string& name)

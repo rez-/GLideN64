@@ -2,5 +2,5 @@
 
 namespace opengl {
 
-	std::array<std::shared_ptr<std::vector<char>>, MaxAttribIndex> GlVertexAttribPointerUnbufferedCommand::m_attribsData;
+	std::unique_ptr<char[]> GlVertexAttribPointerUnbufferedCommand::m_attribsData;
 }

@@ -476,6 +476,62 @@ namespace opengl {
 		GLint m_first;
 		GLsizei m_count;
 	};
+	class GlVertexAttribPointerUnbufferedCommand : public OpenGlCommand
+	{
+	public:
+		GlVertexAttribPointerUnbufferedCommand(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
+			std::size_t offset):
+			OpenGlCommand(false, false, "glVertexAttribPointer"), m_index(index), m_size(size), m_type(type), m_normalized(normalized),
+			m_stride(stride), m_offset(offset)
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			if (m_attribsData == nullptr) {
+				m_attribsData = std::unique_ptr<char[]>(new char[2*1024*1024]);
+			}
+
+			g_glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, (const GLvoid *)(m_attribsData.get()+m_offset));
+		}
+
+		static char* getDrawingData()
+		{
+			return m_attribsData.get();
+		}
+	private:
+
+		GLuint m_index;
+		GLint m_size;
+		GLenum m_type;
+		GLboolean m_normalized;
+		GLsizei m_stride;
+		std::size_t m_offset;
+
+		static std::unique_ptr<char[]> m_attribsData;
+	};
+
+	class GlDrawArraysUnbufferedCommand : public OpenGlCommand
+	{
+	public:
+		GlDrawArraysUnbufferedCommand(GLenum mode, GLint first, GLsizei count, std::unique_ptr<std::vector<char>> data):
+			OpenGlCommand(false, false, "glDrawArrays"), m_mode(mode), m_first(first), m_count(count),
+			m_data(std::move(data))
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			char* data = GlVertexAttribPointerUnbufferedCommand::getDrawingData();
+			std::copy_n(m_data->data(), m_data->size(), data);
+			g_glDrawArrays(m_mode, m_first, m_count);
+		}
+	private:
+		GLenum m_mode;
+		GLint m_first;
+		GLsizei m_count;
+		std::unique_ptr<std::vector<char>> m_data;
+	};
 
 	class GlGetErrorCommand : public OpenGlCommand
 	{
@@ -512,6 +568,33 @@ namespace opengl {
 		GLenum m_type;
 		std::unique_ptr<indiceType[]> m_indices;
 	};
+
+	template <class indiceType>
+	class GlDrawElementsUnbufferedCommand : public OpenGlCommand
+	{
+	public:
+		GlDrawElementsUnbufferedCommand(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices,
+				std::unique_ptr<std::vector<char>> data):
+				OpenGlCommand(false, false, "glDrawElementsUnbuffered"), m_mode(mode), m_count(count), m_type(type),
+				m_indices(std::move(indices)), m_data(std::move(data))
+		{
+		}
+
+		void commandToExecute(void) override
+		{
+			char* data = GlVertexAttribPointerUnbufferedCommand::getDrawingData();
+			std::copy_n(m_data->data(), m_data->size(), data);
+			g_glDrawElements(m_mode, m_count, m_type, m_indices.get());
+		}
+	private:
+		GLenum m_mode;
+		GLsizei m_count;
+		GLenum m_type;
+		std::unique_ptr<indiceType[]> m_indices;
+		std::unique_ptr<std::vector<char>> m_data;
+	};
+
+
 
 	class GlLineWidthCommand : public OpenGlCommand
 	{
@@ -1144,43 +1227,6 @@ namespace opengl {
 		GLboolean m_normalized;
 		GLsizei m_stride;
 		const void* m_pointer;
-	};
-
-	class GlVertexAttribPointerUnbufferedCommand : public OpenGlCommand
-	{
-	public:
-		GlVertexAttribPointerUnbufferedCommand(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
-											 std::size_t offset, std::shared_ptr<std::vector<char>> data):
-				OpenGlCommand(false, false, "glVertexAttribPointer"), m_index(index), m_size(size), m_type(type), m_normalized(normalized),
-				m_stride(stride), m_offset(offset), m_data(data)
-		{
-		}
-
-		bool _updateAttribData(u32 _index, std::shared_ptr<std::vector<char>> _data)
-		{
-			if(m_attribsData[_index] == nullptr || *m_attribsData[_index] != *_data) {
-				m_attribsData[_index] = _data;
-				return true;
-			}
-
-			return false;
-		}
-
-		void commandToExecute(void) override
-		{
-			if(_updateAttribData(m_index, m_data) )
-				g_glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, (const GLvoid *)(m_attribsData[m_index]->data()+m_offset));
-		}
-	private:
-		GLuint m_index;
-		GLint m_size;
-		GLenum m_type;
-		GLboolean m_normalized;
-		GLsizei m_stride;
-		std::size_t m_offset;
-		std::shared_ptr<std::vector<char>> m_data;
-
-		static std::array<std::shared_ptr<std::vector<char>>, MaxAttribIndex> m_attribsData;
 	};
 
 	class GlBindAttribLocationCommand : public OpenGlCommand

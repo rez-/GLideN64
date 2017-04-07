@@ -53,9 +53,12 @@ namespace opengl {
 		static void glTexSubImage2DUnbuffered(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, std::unique_ptr<pixelType[]> pixels);
 		static void glTexSubImage2DBuffered(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, std::size_t offset);
 		static void glDrawArrays(GLenum mode, GLint first, GLsizei count);
+		static void glDrawArraysUnbuffered(GLenum mode, GLint first, GLsizei count, std::unique_ptr<std::vector<char>> data);
 		static GLenum glGetError(void);
 		template <class indiceType>
 		static void glDrawElements(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices);
+		template <class indiceType>
+		static void glDrawElementsUnbuffered(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices, std::unique_ptr<std::vector<char>> data);
 		static void glLineWidth(GLfloat width);
 		static void glClear(GLbitfield mask);
 		static void glGetFloatv(GLenum pname, GLfloat *data);
@@ -95,8 +98,7 @@ namespace opengl {
 		static void glDisableVertexAttribArray(GLuint index);
 		static void glVertexAttribPointerBuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, std::size_t offset);
 		static void glVertexAttribPointerNotThreadSafe(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
-		static void glVertexAttribPointerUnbuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, std::size_t offset,
-			std::shared_ptr<std::vector<char>> data);
+		static void glVertexAttribPointerUnbuffered(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, std::size_t offset);
 		static void glBindAttribLocation(GLuint program, GLuint index, const std::string& name);
 		static void glVertexAttrib1f(GLuint index, GLfloat x);
 		static void glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
@@ -197,6 +199,12 @@ namespace opengl {
 	void FunctionWrapper::glDrawElements(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices)
 	{
 		executeCommand(std::make_shared<GlDrawElementsCommand<indiceType>>(mode, count, type, std::move(indices)));
+	}
+
+	template <class indiceType>
+	void FunctionWrapper::glDrawElementsUnbuffered(GLenum mode, GLsizei count, GLenum type, std::unique_ptr<indiceType[]> indices, std::unique_ptr<std::vector<char>> data)
+	{
+		executeCommand(std::make_shared<GlDrawElementsUnbufferedCommand<indiceType>>(mode, count, type, std::move(indices), std::move(data)));
 	}
 
 	template <class dataType>
